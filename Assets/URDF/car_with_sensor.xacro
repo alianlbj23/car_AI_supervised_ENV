@@ -1,0 +1,129 @@
+<!-- <?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="Fan"> -->
+<!--  -->
+<robot name="small_car" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <material name="green">
+        <color rgba="0 0.5 0.2 1"/>
+    </material>
+    <material name="black">
+        <color rgba="0 0 0 1"/>
+    </material>
+    <material name="white">
+        <color rgba="1 1 1 1"/>
+    </material>
+    <material name="grey">
+        <color rgba="0.5843137254901961 0.6392156862745098 0.6509803921568628 1"/>
+    </material>
+    
+    <xacro:property name="depth" value="0.35" />
+    <xacro:property name="width" value="0.29" />
+    <xacro:property name="hight" value="0.02" />
+    <xacro:property name="mass_body" value="0.5" />
+
+    <link name="base_link">
+        <visual>
+            <geometry>
+                <box size="${depth} ${width} ${hight}"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <material name="grey"/>
+        </visual>
+        <collision>
+            <geometry>
+                <box size="${depth} ${width} ${hight}"/>
+            </geometry>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+        </collision>
+        <inertial>
+            <mass value="${mass_body}"/>
+            <!-- box inertia -->
+            <inertia ixx="${1/12 * mass_body * (hight*hight + depth*depth)}" ixy="0.0" ixz="0.0" iyy="${1/12 * mass_body * (width*width + hight*hight)}" iyz="0.0" izz="${1/12 * mass_body * (width*width + depth*depth)}"/>
+        </inertial>
+    </link>
+  
+    <xacro:property name="mass_wheel" value="0.1" />
+    <xacro:property name="length" value="0.02" />
+    <xacro:property name="radius" value="0.025" />
+
+    <xacro:macro name="front_steering_wheel" params="prefix x_sign y_sign">
+        <link name="${prefix}_front_steering_wheel">
+            <inertial>
+                <mass value="${mass_wheel}"/>
+                <inertia ixx="${1/12 * mass_wheel * (3*radius*radius + length*length)}" ixy="0.0" ixz="0.0" iyy="${1/12 * mass_wheel * (3*radius*radius + length*length)}" iyz="0.0" izz="${1/2 * mass_wheel * radius*radius}"/>
+            </inertial>
+        </link>
+        <!-- steering wheel -->
+        <joint name="${prefix}_front_steering_wheel_joint" type="revolute">
+            <axis rpy="0 0 0" xyz="0 0 1"/>
+            <parent link="base_link"/>
+            <child link="${prefix}_front_steering_wheel"/>
+            <origin rpy="0 0 0" xyz="${x_sign * depth/2} ${y_sign * width/2} -${radius + hight/2}"/>
+        </joint>
+    </xacro:macro>
+ 
+    <xacro:front_steering_wheel prefix="right" x_sign="1" y_sign="-1"/>
+    <xacro:front_steering_wheel prefix="left" x_sign="1" y_sign="1"/>
+
+    <xacro:macro name="forward_wheel" params="prefix parent x_sign y_sign adjust">
+        <link name="${prefix}_forward_wheel">
+            <visual>
+                <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+                <material name="black"/>
+            </visual>
+            <collision>
+                <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+                <geometry>
+                    <cylinder length="${length}" radius="${radius}"/>
+                </geometry>
+            </collision>
+            <inertial>
+                <mass value="${mass_wheel}"/>
+                <!-- cylinder inertia -->
+                <inertia ixx="${1/12 * mass_wheel * (3*radius*radius + length*length)}" ixy="0.0" ixz="0.0" iyy="${1/12 * mass_wheel * (3*radius*radius + length*length)}" iyz="0.0" izz="${1/2 * mass_wheel * radius*radius}"/>
+            </inertial>
+        </link> 
+        <!-- move forward wheel -->
+        <joint name="${prefix}_forward_wheel_joint" type="continuous">
+            <axis rpy="0 0 0" xyz="0 1 0"/>
+            <parent link="${parent}"/>
+            <child link="${prefix}_forward_wheel"/>
+            <origin rpy="0 0 0" xyz="${(x_sign * depth/2) * adjust} ${(y_sign * width/2) * adjust} -${(radius + hight/2) * adjust}"/>
+        </joint>
+    </xacro:macro>
+ 
+    <xacro:forward_wheel prefix="right_front" parent="right_front_steering_wheel" x_sign="1" y_sign="-1" adjust="0"/>
+    <xacro:forward_wheel prefix="left_front" parent="left_front_steering_wheel" x_sign="1" y_sign="1" adjust="0"/>
+    <xacro:forward_wheel prefix="right_back" parent="base_link" x_sign="-1" y_sign="-1" adjust="1"/>
+    <xacro:forward_wheel prefix="left_back" parent="base_link" x_sign="-1" y_sign="1" adjust="1"/>
+
+    
+    <link name="lidar">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.02"/>
+            </geometry>
+            <material name="black"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <cylinder length="0.03" radius="0.02"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <mass value="0.2"/>
+            <origin xyz="0 0 0"/>
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        </inertial>
+    </link>
+    <joint name="scan_joint" type="fixed">
+        <parent link="base_link"/>
+        <child link="lidar"/>
+        <origin rpy="0 0 0" xyz="0.1 0 0.03"/>
+    </joint>
+    
+</robot>
