@@ -73,7 +73,7 @@ public class TrainingManager : MonoBehaviour
     }
 
     IEnumerator DelayedExecution()
-    {  
+    {
         delayInSeconds = 0.001f;
         yield return new WaitForSeconds(delayInSeconds);
         baselink = robot.transform.Find("base_link");
@@ -91,15 +91,13 @@ public class TrainingManager : MonoBehaviour
 
 
         socket.Connect();
-        wheelvelocity.Clear();
-        wheelvelocity.Add((float)0);
-        wheelvelocity.Add((float)0);
+
         State state = robot.GetState(newTarget, wheelvelocity);
 
         Send(state);
         // 在延迟后执行的代码
-        
-        Debug.Log("程式碼在 " + delayInSeconds  + " 秒後執行了！");
+
+        Debug.Log("程式碼在 " + delayInSeconds + " 秒後執行了！");
     }
 
 
@@ -108,18 +106,17 @@ public class TrainingManager : MonoBehaviour
     {
         if (mode == "run model")
         {
-            if(key == 1){
+            if (key == 1)
+            {
                 State state = robot.GetState(newTarget, wheelvelocity);
                 Send(state);
                 key = 0;
-            } 
+            }
         }
         else
         {
             CarMove();
         }
-
-
     }
 
     Vector3 GetTargetPosition(GameObject obj, Vector3 pos)
@@ -192,10 +189,6 @@ public class TrainingManager : MonoBehaviour
 
         if (leftWheel != 0f && rightWheel != 0f)
         {
-            wheelvelocity.Clear();
-            wheelvelocity.Add(leftWheel);
-            wheelvelocity.Add(rightWheel);
-
             State state = robot.GetState(newTarget, wheelvelocity);
             Send(state);
         }
@@ -217,7 +210,7 @@ public class TrainingManager : MonoBehaviour
                 // data[2] = (float)data[2];
                 Debug.Log(data[1]);
 
-                
+                //----------------------------寫收到回傳值的動作
                 // if(data[1]>0 && data[2]>0){
                 //     data[1] = 300;
                 //     data[2] = 300;
@@ -232,14 +225,13 @@ public class TrainingManager : MonoBehaviour
                 //     data[1] = 300;
                 //     data[2] = -300;
                 // }
-                
-
+                //----------------------------------
                 action.voltage.Add((float)data[1]);
                 action.voltage.Add((float)data[2]);
-                Debug.Log((float)data[1]+" "+(float)data[2]);
+                Debug.Log((float)data[1] + " " + (float)data[2]);
                 robot.DoAction(action);
                 wheelvelocity.Clear();
-                
+
                 key = 1;
 
                 break;
@@ -295,34 +287,10 @@ public class TrainingManager : MonoBehaviour
             Debug.Log("error-send");
         }
     }
-
-
     private void SubscribeToTopic(string topic)
     {
         string subscribeMessage = "{\"op\":\"subscribe\",\"id\":\"1\",\"topic\":\"" + topic + "\",\"type\":\"std_msgs/msg/Float32MultiArray\"}";
         socket.Send(subscribeMessage);
     }
-
-
-    bool IsPointInsidePolygon(Vector3 point, Vector3[] polygonVertices)
-    {
-        Debug.Log("IsPointInsidePolygon called" + point);
-        int polygonSides = polygonVertices.Length;
-        bool isInside = false;
-
-        for (int i = 0, j = polygonSides - 1; i < polygonSides; j = i++)
-        {
-            if (((polygonVertices[i].z <= point.z && point.z < polygonVertices[j].z) ||
-                (polygonVertices[j].z <= point.z && point.z < polygonVertices[i].z)) &&
-                (point.x < (polygonVertices[j].x - polygonVertices[i].x) * (point.z - polygonVertices[i].z) / (polygonVertices[j].z - polygonVertices[i].z) + polygonVertices[i].x))
-            {
-                isInside = !isInside;
-            }
-        }
-        return isInside;
-    }
-
-
-
 }
 
