@@ -2,6 +2,7 @@
 ## 安裝
 * 直接將裡面的東西用Unity開，可以用別的版本開啟(2022.3.9f1可以)
 * 打開後左下有個Scenes，選class
+* supervised 程式碼 : https://github.com/alianlbj23/car_AI_supervised_learning
 ## 重點程式碼
 ### 管理車體驅動、環境數值收送
 * trainingManager
@@ -18,3 +19,5 @@
     * 取得車子座標、轉速、四位數轉角
 * MotorMoveForward
     * 收到數值讓車輪轉動
+### 定義要回傳給AI的資料
+* State (不一定都要用，但沒定義一定不能用)
