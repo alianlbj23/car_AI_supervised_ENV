@@ -1,4 +1,6 @@
 # car_AI supervsed learning Unity ENV
+## 訓練用程式碼
+https://github.com/alianlbj23/car_AI_RL
 ## 安裝
 * 直接將裡面的東西用Unity開，可以用別的版本開啟(2022.3.9f1可以)
 * 打開後左下有個Scenes，選class
