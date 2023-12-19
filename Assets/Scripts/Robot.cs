@@ -35,7 +35,7 @@ public class Robot : MonoBehaviour
 
     }
 
-    public State GetState(Vector3 newTarget, List<float> wheelvelocity)
+    public State GetState(Vector3 newTarget)
     {
         Vector3 carPos = baseLinkM.x;
         Vector3 carVel = baseLinkM.v;

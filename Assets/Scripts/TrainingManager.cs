@@ -64,7 +64,7 @@ public class TrainingManager : MonoBehaviour
 
     Transform baselink;
     Vector3 carPos;
-    string mode = "run model1";
+    string mode = "train";
     float key = 0;
     public float delayInSeconds = 0f;
     void Start()
@@ -80,7 +80,7 @@ public class TrainingManager : MonoBehaviour
         newTarget = GetTargetPosition(target, newTarget);
         socket = new WebSocket(rosbridgeServerUrl);
 
-        if (mode == "run model")
+        if (mode == "train")
         {
             socket.OnOpen += (sender, e) =>
             {
@@ -92,7 +92,7 @@ public class TrainingManager : MonoBehaviour
 
         socket.Connect();
 
-        State state = robot.GetState(newTarget, wheelvelocity);
+        State state = robot.GetState(newTarget);
 
         Send(state);
         // 在延迟后执行的代码
@@ -104,11 +104,12 @@ public class TrainingManager : MonoBehaviour
 
     void Update()
     {
-        if (mode == "run model")
+        if (mode == "train")
         {
             if (key == 1)
             {
-                State state = robot.GetState(newTarget, wheelvelocity);
+                State state = robot.GetState(newTarget);
+                Debug.Log("hello");
                 Send(state);
                 key = 0;
             }
@@ -189,7 +190,7 @@ public class TrainingManager : MonoBehaviour
 
         if (leftWheel != 0f && rightWheel != 0f)
         {
-            State state = robot.GetState(newTarget, wheelvelocity);
+            State state = robot.GetState(newTarget);
             Send(state);
         }
     }
@@ -207,30 +208,18 @@ public class TrainingManager : MonoBehaviour
                 Robot.Action action = new Robot.Action();
                 action.voltage = new List<float>();
                 data[1] = (float)data[1];
-                // data[2] = (float)data[2];
+                float left = 0f;
+                float right = 0f;
                 Debug.Log(data[1]);
+                if(data[1] == 0f){
+                    left = 300f;
+                    right = 300f;
+                }
 
-                //----------------------------寫收到回傳值的動作
-                // if(data[1]>0 && data[2]>0){
-                //     data[1] = 300;
-                //     data[2] = 300;
-                // }
 
-                // else if(data[1]<0 && data[2]>0){
-                //     data[1] = -300;
-                //     data[2] = 300;
-                // }
-
-                // else if(data[1]>0 && data[2]<0){
-                //     data[1] = 300;
-                //     data[2] = -300;
-                // }
-                //----------------------------------
-                action.voltage.Add((float)data[1]);
-                action.voltage.Add((float)data[2]);
-                Debug.Log((float)data[1] + " " + (float)data[2]);
+                action.voltage.Add(left);
+                action.voltage.Add(right);
                 robot.DoAction(action);
-                wheelvelocity.Clear();
 
                 key = 1;
 
@@ -241,7 +230,7 @@ public class TrainingManager : MonoBehaviour
 
     State updateState(Vector3 newTarget, List<float> wheelvelocity)
     {
-        State state = robot.GetState(newTarget, wheelvelocity);
+        State state = robot.GetState(newTarget);
 
         return state;
     }
